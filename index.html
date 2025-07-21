@@ -1,0 +1,186 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio de Julien Thuillier</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+    }
+    .project-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .project-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+    .project-icon {
+      color: #2563eb;
+      margin-right: 8px;
+    }
+    .project-button {
+      transition: background-color 0.3s ease;
+    }
+    .project-button:hover {
+      background-color: #1e40af;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- Navigation -->
+  <nav class="bg-blue-600 text-white p-4 sticky top-0 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold">Julien Thuillier</h1>
+      <ul class="flex space-x-4">
+        <li><a href="#home" class="hover:underline">Accueil</a></li>
+        <li><a href="#about" class="hover:underline">À propos</a></li>
+        <li><a href="#projects" class="hover:underline">Projets</a></li>
+        <li><a href="#contact" class="hover:underline">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Accueil -->
+  <section id="home" class="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+    <div class="text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-4">Bienvenue sur mon Portfolio</h2>
+      <p class="text-lg md:text-xl">Julien Thuillier, Docteur en Automatique, spécialiste en commande, estimation et diagnostic des systèmes.</p>
+    </div>
+  </section>
+
+  <!-- À propos -->
+  <section id="about" class="py-16 container mx-auto px-4">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">À propos de moi</h2>
+    <div class="max-w-3xl mx-auto text-center">
+      <p class="text-lg">
+        Je suis Julien Thuillier, titulaire d’un doctorat en Sciences et Technologies Industrielles - Automatique de l’INSA Centre Val de Loire (2019).
+        Spécialisé en commande, estimation et diagnostic des systèmes, je possède une expertise en conception, modélisation et optimisation de systèmes complexes.
+        Mes travaux de recherche incluent le développement d’observateurs à mémoire finie pour la détection de pannes et la gestion de systèmes commandés en réseau.
+        Depuis le 1er juillet 2025, je suis à la recherche de nouvelles opportunités professionnelles dans les domaines de l’automatique, de la commande, et de l’optimisation des systèmes industriels.
+      </p>
+    </div>
+  </section>
+
+  <!-- Projets -->
+  <section id="projects" class="py-16 bg-gray-200">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-10">Mes Projets</h2>
+    <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+      <!-- Projet 1 : Observateurs et Diagnostic -->
+      <div class="project-card bg-white shadow-lg">
+        <img src="https://via.placeholder.com/300x200" alt="Observateurs et Diagnostic" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-3"><i class="fas fa-network-wired project-icon"></i>Observateurs et Diagnostic des Systèmes en Réseau</h3>
+          <p class="text-gray-600 mb-4">
+            Conception d’observateurs à mémoire finie pour des systèmes avec corrélations entre bruits de mesure et d’état, appliqués à la détection de pannes.
+            Développement d’un outil de diagnostic pour identifier les cyber-attaques par modification de contenu dans les systèmes de contrôle en réseau incertains.
+          </p>
+          <a href="#" class="project-button inline-block bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">En savoir plus</a>
+        </div>
+      </div>
+      <!-- Projet 2 : Contrôle de Moteurs-Fusées -->
+      <div class="project-card bg-white shadow-lg">
+        <img src="https://via.placeholder.com/300x200" alt="Contrôle de Moteurs-Fusées" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-3"><i class="fas fa-rocket project-icon"></i>Contrôle de Moteurs-Fusées</h3>
+          <p class="text-gray-600 mb-4">
+            Développement de systèmes de contrôle conscients de l’état de santé pour moteurs-fusées cryogéniques réutilisables au CNES.
+          </p>
+          <a href="#" class="project-button inline-block bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">En savoir plus</a>
+        </div>
+      </div>
+      <!-- Projet 3 : MPC pour Digestion Anaérobie -->
+      <div class="project-card bg-white shadow-lg">
+        <img src="https://via.placeholder.com/300x200" alt="MPC Digestion Anaérobie" class="w-full h-48 object-cover">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-3"><i class="fas fa-cogs project-icon"></i>MPC pour Processus de Digestion Anaérobie</h3>
+          <p class="text-gray-600 mb-4">
+            Conception d’un contrôleur prédictif basé sur un modèle (MPC) pour optimiser les processus de digestion anaérobie, en utilisant des modèles d’apprentissage automatique pour améliorer la prédiction et la robustesse.
+          </p>
+          <a href="#" class="project-button inline-block bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">En savoir plus</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="py-16 container mx-auto px-4">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Me contacter</h2>
+    <form action="https://formspree.io/f/votre-id-formspree" method="POST" class="max-w-lg mx-auto">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium">Nom</label>
+        <input type="text" id="name" name="name" required class="w-full p-2 border rounded">
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block text-sm font-medium">Email</label>
+        <input type="email" id="email" name="email" required class="w-full p-2 border rounded">
+      </div>
+      <div class="mb-4">
+        <label for="message" for="message" class="block text-sm font-medium">Message</label>
+        <textarea id="message" name="message" required class="w-full p-2 border rounded h-32"></textarea>
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Envoyer</button>
+    </form>
+  </section>
+
+  <!-- Pied de page -->
+  <footer class="bg-gray-800 text-white text-center p-4">
+    <p>© 2025 Julien Thuillier. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+    // Smooth scrolling pour la navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+</body>
+</html>
